@@ -12,6 +12,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public ErrorResponse handleAllExceptions(Exception ex) {
+        log.error("Internal Server Error, " + ex.getMessage(), ex);
+        return new ErrorResponse(ex.getMessage());
+    }
+
     @ExceptionHandler(CurrencyProviderException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
@@ -23,8 +31,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidConversionRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ErrorResponse handleInvalidCurrencyException(InvalidConversionRequestException ex) {
-        log.warn(ex.getMessage());
+    public ErrorResponse handleInvalidConversionRequestException(InvalidConversionRequestException ex) {
+        log.info("Invalid conversion request:" + ex.getMessage());
         return new ErrorResponse(ex.getMessage());
     }
 

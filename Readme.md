@@ -10,14 +10,20 @@
   }`
 - Response message includes fields in the request along with `converted` field that represents the converted amount
 - Currencies should be provided with 3-letter codes such as EUR, USD, GBP, etc. (https://www.exchangerate-api.com/docs/supported-currencies)
-- One of the external providers in the requirement document (https://api.exchangeratesapi.io/latest?base=EUR)
-  has moved to http://apilayer.net/api/live domain and requires subscription and an access token. 
-  The url that includes the access token can be modified in `src/main/resources/application.properties` under `api.currencyLayer.url`
+- 2 external exchange rate providers are used to calculate currency conversion.
+  
+  - Exchange Rate API: https://api.exchangerate-api.com/v4/latest/USD
+  - Currency Layer API: http://apilayer.net/api/live (previously: https://api.exchangeratesapi.io/latest?base=EUR)
+- For each conversion request one of the two external providers is chosen randomly. 
+  If one provider fails or does not provide requested currency then other external provider is tried.
+- If both external providers fail or an internal error occurs, `/currency/convert` endpoint returns an error with an explanation `message`
+- Currency Layer API requires subscription and an access token. 
+  The url and access token can be modified in `src/main/resources/application.properties` under `api.currencyLayer.url`
 - Note that, this free subscription for Currency Layer API has limitations in terms of currency and number of requests. 
   Only USD conversions are available, and you can make 250 requests per month. 
   Please provide a different access token if you reach this limit or want to convert other currencies
-- The other external provider's url can be modified via `api.exchangeRate.url` in the `src/main/resources/application.properties` file.
-  This provider has also limitations about number of requests and apply rate limiting.
+- Exchange Rate API's url can be modified via `api.exchangeRate.url` in the `src/main/resources/application.properties` file.
+  This provider has also limitations about number of requests and applies rate limiting.
 - If you want to run the application on a different port you can edit `server.port=8080` in the `src/main/resources/application.properties` file
 
 ## Usage
