@@ -8,8 +8,17 @@
     "to": "",
     "amount": 0
   }`
-- If you want to run the application on a different port you can edit `server.port=9900` in the `src/main/resources/application.properties`.
-- More about APIs, access keys, timeout settings so on!
+- Response message includes fields in the request along with `converted` field that represents the converted amount
+- Currencies should be provided with 3-letter codes such as EUR, USD, GBP, etc. (https://www.exchangerate-api.com/docs/supported-currencies)
+- One of the external providers in the requirement document (https://api.exchangeratesapi.io/latest?base=EUR)
+  has moved to http://apilayer.net/api/live domain and requires subscription and an access token. 
+  The url that includes the access token can be modified in `src/main/resources/application.properties` under `api.currencyLayer.url`
+- Note that, this free subscription for Currency Layer API has limitations in terms of currency and number of requests. 
+  Only USD conversions are available, and you can make 250 requests per month. 
+  Please provide a different access token if you reach this limit or want to convert other currencies
+- The other external provider's url can be modified via `api.exchangeRate.url` in the `src/main/resources/application.properties` file.
+  This provider has also limitations about number of requests and apply rate limiting.
+- If you want to run the application on a different port you can edit `server.port=8080` in the `src/main/resources/application.properties` file
 
 ## Usage
 
@@ -40,6 +49,33 @@
 
 
 ### RUN WITH DOCKER
-**`docker run -a stdout alidemirsoy/web-crawler`**
+**`docker run -a stdout alidemirsoy/currency-converter`**
 
+### FUTURE WORK
+###Authentication for External APIs
+- Currently, there are 2 external providers for retrieving exchange rates and one of them requires an access token.
+This access token never expires and is attached to url
+- If these external providers require a session based authentication that needs to be provided as a request header, 
+then there's a need to handle the session tokens as these usually expire after a certain period 
+  and need to be created programmatically.
+- In that case, we would create and cache session tokens until we receive an 'Unauthorized' error from external providers,
+and re-create a session on every authentication error (or when cache is empty)
 
+###Caching
+- Free usages of external exchange rate providers do not provide instant rates 
+  but provide rates that are updated less frequently such as every 24 hours. 
+  That means there's an external cache that is invalidated every 24 hours.
+  Hence, there's no need to perform frequent network requests for the rates that are recently requested.
+- As a performance improvement and overcome usage limitations of these APIs, 
+  we can easily cache currency pairs such as EURUSD and store its value for a period of time. 
+- Time to Live for the stored values can be configured depending on external providers' refresh rate.
+  API responses contain a timestamp that represents the time when exchange rate is stored. 
+  The difference between the refresh rate and the passed time until current time would be the TTL.
+  
+    ` TTL = Refresh Rate of External API - (Current Time - Timestamp)`
+- In order to utilize this caching, we would first check if there's a cached currency pair for every request
+and use the existing cache or move on with a network request.
+
+- Finally, we can easily cache these values in JVM in a HashMap, but it wouldn't fit for a clustered environment
+as we need a central cache that every instance should share.
+  Hence, it's recommended to use high available, distributed caching tools such as Redis, Hazelcast, etc.

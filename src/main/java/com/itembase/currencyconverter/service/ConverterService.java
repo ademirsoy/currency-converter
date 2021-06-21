@@ -47,7 +47,6 @@ public class ConverterService {
         return exchangeRateResponse
                 .map(exchangeRateApiResponse -> calculateConversion(request, exchangeRateApiResponse))
                 .onErrorResume(e -> retryOnError ? convertWithCurrencyLayerApi(request, false) : Mono.error(e));
-
     }
 
     private Mono<ConversionResponse> convertWithCurrencyLayerApi(ConversionRequest request, Boolean retryOnError) {
