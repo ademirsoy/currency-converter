@@ -65,7 +65,7 @@ Note that you need to set Content-Type header to application/json
 - You can follow the logs of the application under `logs` directory in the project folder
 
 ### FUTURE WORK
-###Authentication for External APIs
+### Authentication for External APIs
 - Currently, there are 2 external providers for retrieving exchange rates and one of them requires an access token.
 This access token never expires and is attached to url
 - If these external providers require a session based authentication that needs to be provided as a request header, 
@@ -74,7 +74,7 @@ then there's a need to handle the session tokens as these usually expire after a
 - In that case, we would create and cache session tokens until we receive an 'Unauthorized' error from external providers,
 and re-create a session on every authentication error (or when cache is empty)
 
-###Caching
+### Caching
 - Free usages of external exchange rate providers do not provide instant rates 
   but provide rates that are updated less frequently such as every 24 hours. 
   That means there's an external cache that is invalidated every 24 hours.
