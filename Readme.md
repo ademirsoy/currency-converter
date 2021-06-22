@@ -1,9 +1,9 @@
 # Currency Converter
 
 - Currency Converter is an API that converts between currencies
-- It has a single endpoint `/currency/convert` and it takes the following as a request:
-  
-`{
+- It has a single endpoint `/currency/convert` and it takes the following json as a request. 
+  A complete request example can be found in Test section below. 
+  - `{
     "from": "",
     "to": "",
     "amount": 0
@@ -56,6 +56,13 @@
 
 ### RUN WITH DOCKER
 **`docker run -a stdout alidemirsoy/currency-converter`**
+
+### TEST
+You can easily test the application by sending HTTP requests via cURL or any other Http client.
+Note that you need to set Content-Type header to application/json
+- An example cURL request is as follows:
+  - `curl -X POST 'localhost:8080/currency/convert' -H 'Content-Type: application/json' -d '{"from": "EUR","to": "USD","amount": 10 }'`
+- You can follow the logs of the application under `logs` directory in the project folder
 
 ### FUTURE WORK
 ###Authentication for External APIs

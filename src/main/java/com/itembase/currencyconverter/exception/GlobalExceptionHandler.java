@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ErrorResponse handleInvalidConversionRequestException(InvalidConversionRequestException ex) {
-        log.info("Invalid conversion request:" + ex.getMessage());
+        log.info("Invalid conversion request. " + ex.getMessage());
         return new ErrorResponse(ex.getMessage());
     }
 

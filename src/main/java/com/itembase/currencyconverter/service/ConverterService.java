@@ -42,7 +42,7 @@ public class ConverterService {
     }
 
     private Mono<ConversionResponse> convertWithExchangeRateApi(ConversionRequest request, Boolean retryOnError) {
-        log.info("Currency conversion started with Exchange Rate API for " + request.getFrom() + " to " + request.getTo());
+        log.info("Currency conversion will be performed with Exchange Rate API from " + request.getFrom() + " to " + request.getTo());
         Mono<ExchangeRateApiResponse> exchangeRateResponse = this.exchangeRateApiClient.getRates(request.getFrom());
         return exchangeRateResponse
                 .map(exchangeRateApiResponse -> calculateConversion(request, exchangeRateApiResponse))
@@ -50,7 +50,7 @@ public class ConverterService {
     }
 
     private Mono<ConversionResponse> convertWithCurrencyLayerApi(ConversionRequest request, Boolean retryOnError) {
-        log.info("Currency conversion started with Currency Layer API for " + request.getFrom() + " to " + request.getTo());
+        log.info("Currency conversion will be performed with Currency Layer API from " + request.getFrom() + " to " + request.getTo());
         Mono<CurrencyLayerApiResponse> apiResponse = this.currencyLayerApiClient.getRates();
         return apiResponse
                 .map(currencyLayerApiResponse -> calculateConversion(request, currencyLayerApiResponse))
@@ -62,17 +62,20 @@ public class ConverterService {
         Map<String, BigDecimal> rates = apiResponse.getRates();
 
         if (!apiResponse.isSuccess() || rates == null) {
-            log.warn("Could not retrieve rates from external API: " + apiResponse.getError());
+            log.warn("Could not retrieve rates from external API: {}", apiResponse.getError());
             throw new CurrencyProviderException(apiResponse.getError());
         }
         String currencyKeyPrefix = apiResponse instanceof CurrencyLayerApiResponse ? request.getFrom().toUpperCase() : "";
         BigDecimal exchangeRate = rates.get(currencyKeyPrefix + request.getTo().toUpperCase());
 
         if (exchangeRate == null) {
-            throw new InvalidConversionRequestException("Requested currency not available. From: " + request.getFrom() + " To: " + request.getTo());
+            String message = "Requested currency not available. From: " + request.getFrom() + " To: " + request.getTo();
+            log.warn(message);
+            throw new InvalidConversionRequestException(message);
         }
         BigDecimal convertedValue = request.getAmount().multiply(exchangeRate).setScale(2, RoundingMode.HALF_EVEN);
         conversionResponse.setConverted(convertedValue);
+        log.info("Converted {} {} to {} {}", request.getAmount(), request.getFrom(), convertedValue, request.getTo());
         return conversionResponse;
     }
 }

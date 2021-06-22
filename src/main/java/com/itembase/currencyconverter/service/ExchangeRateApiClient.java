@@ -29,9 +29,21 @@ public class ExchangeRateApiClient {
                 .onStatus(HttpStatus::is4xxClientError,
                         clientResponse -> clientResponse
                                 .bodyToMono(ExchangeRateApiResponse.class)
-                                .flatMap(apiResponse -> Mono.error(new InvalidConversionRequestException("Invalid currency rate request: " + apiResponse.getError()))))
+                                .flatMap(apiResponse -> {
+                                    log.warn("Exchange Rate API call failed: {}", apiResponse.getError());
+                                    return Mono.error(new InvalidConversionRequestException("Invalid currency rate request: " + apiResponse.getError()));
+                                })
+                )
                 .onStatus(HttpStatus::is5xxServerError,
-                        clientResponse -> Mono.error(new CurrencyProviderException("Internal Server Error: Exchange Rate API call failed"))
+                        clientResponse -> {
+                            clientResponse
+                                    .bodyToMono(String.class)
+                                    .flatMap(body -> {
+                                        log.warn("Exchange Rate API call failed: {}", body);
+                                        return Mono.just(clientResponse);
+                                    });
+                            return Mono.error(new CurrencyProviderException("Internal Server Error: Exchange Rate API call failed"));
+                        }
                 )
                 .bodyToMono(ExchangeRateApiResponse.class);
     }
