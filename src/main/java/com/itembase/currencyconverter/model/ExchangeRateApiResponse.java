@@ -11,7 +11,7 @@ public class ExchangeRateApiResponse implements CurrencyApiResponse {
     private String date;
     private Long time_last_updated;
     private Map<String, BigDecimal> rates;
-    @JsonProperty("error_type")
+    @JsonProperty("error-type")
     private String error;
     private String result;
 

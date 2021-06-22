@@ -12,7 +12,7 @@
 - Currencies should be provided with 3-letter codes such as EUR, USD, GBP, etc. (https://www.exchangerate-api.com/docs/supported-currencies)
 - 2 external exchange rate providers are used to calculate currency conversion.
   
-  - Exchange Rate API: https://api.exchangerate-api.com/v4/latest/USD
+  - Exchange Rate API: https://open.er-api.com/v6/latest/ (previously: https://api.exchangerate-api.com/v4/latest/USD)
   - Currency Layer API: http://apilayer.net/api/live (previously: https://api.exchangeratesapi.io/latest?base=EUR)
 - For each conversion request one of the two external providers is chosen randomly. 
   If one provider fails or does not provide requested currency then other external provider is tried.
@@ -68,8 +68,8 @@ Note that you need to set Content-Type header to application/json
 ### Authentication for External APIs
 - Currently, there are 2 external providers for retrieving exchange rates and one of them requires an access token.
 This access token never expires and is attached to url
-- If these external providers require a session based authentication that needs to be provided as a request header, 
-then there's a need to handle the session tokens as these usually expire after a certain period 
+- If these external providers require a session based authentication, 
+then there's a need to handle the session tokens as these will expire after a certain period 
   and need to be created programmatically.
 - In that case, we would create and cache session tokens until we receive an 'Unauthorized' error from external providers,
 and re-create a session on every authentication error (or when cache is empty)
@@ -92,3 +92,15 @@ and use the existing cache or move on with a network request.
 - Finally, we can easily cache these values in JVM in a HashMap, but it wouldn't fit for a clustered environment
 as we need a central cache that every instance should share.
   Hence, it's recommended to use high available, distributed caching tools such as Redis, Hazelcast, etc.
+
+### External Provider Health
+- External providers periodically update their APIs and eventually stop supporting old versions. 
+  For instance Exchange Rate API returns a field time_eol that shows expected time of depreciation.
+  This should create an alert in this application and necessary changes should be implemented urgently.
+- Depending on the subscription to external providers, supported currencies are limited. 
+  For instance Currency Layer API only supports USD currency in the free plan. 
+  If free plan will remain to be used, then randomized logic to choose external providers should be enhanced to forward
+  non-USD currencies directly to the other API.
+- A circuit breaker mechanism can be implemented when choosing the external provider. 
+  For example when the program hits the limit of max number of requests, or faces a rate limit, 
+  then it would be wise to prevent requests to that external provider for a reasonable time. 
