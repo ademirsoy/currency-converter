@@ -95,7 +95,7 @@ as we need a central cache that every instance should share.
 
 ### External Provider Health
 - External providers periodically update their APIs and eventually stop supporting old versions. 
-  For instance Exchange Rate API returns a field time_eol that shows expected time of depreciation.
+  For instance Exchange Rate API returns a field named `time_eol` that shows expected time of depreciation.
   This should create an alert in this application and necessary changes should be implemented urgently.
 - Depending on the subscription to external providers, supported currencies are limited. 
   For instance Currency Layer API only supports USD currency in the free plan. 
