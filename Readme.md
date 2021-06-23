@@ -55,7 +55,7 @@
 
 
 ### RUN WITH DOCKER
-**`docker run -a stdout alidemirsoy/currency-converter`**
+**`docker run -p 8080:8080 alidemirsoy/currency-converter`**
 
 ### TEST
 You can easily test the application by sending HTTP requests via cURL or any other Http client.
