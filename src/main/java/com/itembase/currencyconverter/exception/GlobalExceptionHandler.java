@@ -1,6 +1,8 @@
 package com.itembase.currencyconverter.exception;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -37,7 +39,9 @@ public class GlobalExceptionHandler {
     }
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class ErrorResponse {
-        private final String message;
+        private String message;
     }
 }
